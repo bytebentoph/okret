@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OKRET — Collection 01</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23f3f1ec'/%3E%3Ccircle cx='16' cy='16' r='8.5' fill='none' stroke='%23141414' stroke-width='3'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;800&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- line icons (Lucide, ISC licence) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+    <symbol id="i-cart" viewBox="0 0 24 24"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M7 7h10v10M7 17 17 7"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+    <symbol id="i-prev" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
+    <symbol id="i-next" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+    <symbol id="i-sound" viewBox="0 0 24 24"><path d="M11 4.7a.7.7 0 0 0-1.2-.5L6.4 7.6A1.4 1.4 0 0 1 5.4 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.4a1.4 1.4 0 0 1 1 .4l3.4 3.4a.7.7 0 0 0 1.2-.5zM16 9a5 5 0 0 1 0 6M19.4 18.4a9 9 0 0 0 0-12.8"/></symbol>
+    <symbol id="i-mute" viewBox="0 0 24 24"><path d="M11 4.7a.7.7 0 0 0-1.2-.5L6.4 7.6A1.4 1.4 0 0 1 5.4 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.4a1.4 1.4 0 0 1 1 .4l3.4 3.4a.7.7 0 0 0 1.2-.5zM22 9l-6 6M16 9l6 6"/></symbol>
+    <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+    <symbol id="i-grid2" viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="18" rx="1"/><rect x="13" y="3" width="8" height="18" rx="1"/></symbol>
+    <symbol id="i-grid3" viewBox="0 0 24 24"><rect x="2" y="3" width="5.3" height="18" rx="1"/><rect x="9.35" y="3" width="5.3" height="18" rx="1"/><rect x="16.7" y="3" width="5.3" height="18" rx="1"/></symbol>
+    <symbol id="i-grid4" viewBox="0 0 24 24"><rect x="2" y="3" width="3.6" height="18" rx=".8"/><rect x="7.47" y="3" width="3.6" height="18" rx=".8"/><rect x="12.93" y="3" width="3.6" height="18" rx=".8"/><rect x="18.4" y="3" width="3.6" height="18" rx=".8"/></symbol>
+  </svg>
+  <div class="page" id="page">
+    <header class="top">
+      <button class="top__menu" id="menuOpen" type="button" aria-label="Menu" aria-controls="menu" aria-expanded="false"><svg class="icon"><use href="#i-menu"/></svg></button>
+      <a class="logo" href="#" aria-label="OKRET home">OKRET</a>
+      <div class="top__end">
+      <button class="top__sound" id="soundToggle" type="button" aria-label="Sound on" aria-pressed="true"><svg class="icon"><use href="#i-sound"/></svg></button>
+      <button class="top__cart" id="cartOpen" type="button" aria-label="Cart, 0 items" aria-controls="cart" aria-expanded="false"><svg class="icon"><use href="#i-cart"/></svg><span class="top__count" id="cartCount" hidden>0</span></button>
+      </div>
+    </header>
+
+    <main class="stage">
+      <p class="eyebrow"><span>On the rail</span><span class="eyebrow__sep"></span><span class="muted">Okret / Collection 01</span></p>
+
+      <div class="rail-wrap">
+        <div class="rail" aria-hidden="true"><span class="rail__cap"></span><span class="rail__bar"></span><span class="rail__cap"></span></div>
+        <ul class="hangers" id="hangers"></ul>
+        <div class="hangers-front" id="hangersFront" aria-hidden="true"></div>
+      </div>
+
+      <div class="caption" id="caption">
+        <p class="caption__title" id="captionTitle"></p>
+        <p class="caption__hint muted" id="captionHint">Hover to turn. Click to explore.</p>
+      </div>
+      <a class="pill" href="#shop" id="explore">Explore Okret <svg class="icon icon--sm" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+    </main>
+
+    <!-- catalogue (#shop, #shop/<category>) -->
+    <main class="shop" id="shop" hidden>
+      <div class="shop__bar">
+        <nav class="shop__filters" id="shopFilters" aria-label="Categories"></nav>
+        <div class="shop__tools">
+          <span class="shop__count muted" id="shopCount"></span>
+          <div class="shop__grid-size" role="group" aria-label="Grid size">
+            <button type="button" data-cols="2" aria-label="2 per row"><svg class="icon"><use href="#i-grid2"/></svg></button>
+            <button type="button" data-cols="3" aria-label="3 per row"><svg class="icon"><use href="#i-grid3"/></svg></button>
+            <button type="button" data-cols="4" aria-label="4 per row"><svg class="icon"><use href="#i-grid4"/></svg></button>
+          </div>
+        </div>
+      </div>
+      <ul class="shop__grid" id="shopGrid"></ul>
+    </main>
+  </div>
+
+  <!-- menu drawer -->
+  <aside class="drawer drawer--left" id="menu" hidden aria-label="Menu">
+    <div class="drawer__head"><span class="drawer__title">Menu</span><button class="drawer__close" type="button" data-close aria-label="Close menu"><svg class="icon"><use href="#i-close"/></svg></button></div>
+    <nav class="menu" id="menuNav"></nav>
+  </aside>
+
+  <!-- cart drawer: items -> checkout (demo) -> confirmation -->
+  <aside class="drawer drawer--right" id="cart" hidden aria-label="Cart">
+    <div class="drawer__head"><span class="drawer__title" id="cartTitle">Cart</span><button class="drawer__close" type="button" data-close aria-label="Close cart"><svg class="icon"><use href="#i-close"/></svg></button></div>
+    <div class="cart__body" id="cartBody"></div>
+    <div class="cart__foot" id="cartFoot"></div>
+  </aside>
+  <div class="scrim" id="scrim" hidden></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <section class="detail" id="detail" hidden aria-modal="true" role="dialog" aria-labelledby="detailName">
+    <button class="detail__close" id="detailClose" type="button" aria-label="Close"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button>
+    <button class="detail__nav detail__nav--prev" id="detailPrev" type="button" aria-label="Previous garment"><svg class="icon"><use href="#i-prev"/></svg></button>
+    <button class="detail__nav detail__nav--next" id="detailNext" type="button" aria-label="Next garment"><svg class="icon"><use href="#i-next"/></svg></button>
+    <figure class="detail__figure" id="detailFigure"></figure>
+    <div class="detail__info">
+      <p class="detail__count muted" id="detailCount"></p>
+      <h1 class="detail__name" id="detailName"></h1>
+      <p class="detail__meta muted" id="detailMeta"></p>
+      <div class="toggle" role="tablist">
+        <button type="button" role="tab" data-side="front" aria-selected="true">Front</button>
+        <button type="button" role="tab" data-side="back" aria-selected="false">Back</button>
+      </div>
+      <div class="buy" id="buy"></div>
+    </div>
+  </section>
+
+  <script src="data.js"></script>
+  <script src="catalog.js"></script>
+  <script src="app.js"></script>
+  <script src="store.js"></script>
+  <script src="sound.js"></script>
+</body>
+</html>

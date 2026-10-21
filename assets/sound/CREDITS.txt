@@ -1,0 +1,3 @@
+Sounds in this folder are cut from CC0 (public domain) recordings - no attribution required, credited anyway:
+  "202 More Sound Effects" by OwlishMedia - https://opengameart.org/content/202-more-sound-effects
+Trimmed, cleaned and levelled by tools/build_sounds.py.
