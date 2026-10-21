@@ -98,6 +98,31 @@
     ctx.globalCompositeOperation = "source-over";
   }
 
+  // ---------- frame download queue ----------
+  // A few downloads at a time instead of all 443 handed to the browser at once: then the order can still
+  // change, so the garment you hover can jump ahead of the rest.
+  const queue = [], INFLIGHT = 6;
+  let inflight = 0;
+  function fetchFrame(img, url, first) {
+    if (img.src) return;
+    const at = queue.indexOf(img);
+    if (at >= 0) { if (!first) return; queue.splice(at, 1); }
+    img.url = url;
+    first ? queue.unshift(img) : queue.push(img);
+    pump();
+  }
+  function pump() {
+    while (inflight < INFLIGHT && queue.length) {
+      const img = queue.shift();
+      if (img.src) continue;
+      inflight++;
+      const done = () => { img.removeEventListener("load", done); img.removeEventListener("error", done); inflight--; pump(); };
+      img.addEventListener("load", done);
+      img.addEventListener("error", done);
+      img.src = img.url;
+    }
+  }
+
   class Turn {
     constructor(g, host, frontHost) {
       this.g = g;
@@ -128,11 +153,10 @@
       }
       new ResizeObserver(() => this.redraw()).observe(host);
     }
-    // request frame i if it has not been yet (load order: see loadFrames)
-    load(i) {
-      const img = this.frames[i];
-      if (!img.src) img.src = asset(this.g, `turn/${pad(i)}.webp`);
-    }
+    // queue frame i for download (order: see the load order below rail; hovering jumps the queue)
+    load(i, first = false) { fetchFrame(this.frames[i], asset(this.g, `turn/${pad(i)}.webp`), first); }
+    // the garment under the cursor: its missing frames go to the front of the queue, in turn order
+    hurry() { for (let i = this.count - 1; i >= 0; i--) this.load(i, true); }
     redraw() {
       this.waiting = false;
       const r = this.canvas.getBoundingClientRect();
@@ -154,7 +178,10 @@
       while (i > 0 && !ok(i)) i--;
       while (j < this.count - 1 && !ok(j)) j++;
       if (!ok(j)) j = i;
-      const f = j > i ? clamp01((pos - i) / (j - i)) : 0;
+      let f = j > i ? clamp01((pos - i) / (j - i)) : 0;
+      // ...but only across a small gap: blending two poses several frames apart shows both at once (a
+      // ghosted double garment), so across a big gap it shows the nearer frame on its own
+      if (j - i > 2) { if (f >= 0.5) i = j; else j = i; f = 0; }
       const a = this.frames[i], b = this.frames[j];
       const i0 = Math.floor(pos);
       this.waiting = !ok(i0) || (pos > i0 + 0.01 && !ok(Math.min(i0 + 1, this.count - 1)));   // redraw when they arrive
@@ -348,6 +375,7 @@
   const panOf = (k) => Math.max(-1, Math.min(1, ((zone.left + slot * (k + 0.5)) / innerWidth) * 2 - 1)) * 0.8;
   function setOpen(i) {
     if (i === active) return;
+    if (i >= 0) items[i].turn?.hurry();
     if (active >= 0) turnTo(items[active], 0);
     if (i >= 0) turnTo(items[i], 1);
     active = i;
@@ -373,8 +401,11 @@
     return items.findIndex((it) => Math.abs(left + it.x - x) <= (slot + clamp01(it.tp) * (open - slot)) / 2);
   }
 
+  let hoverCol = -1;
   list.addEventListener("pointermove", (e) => {
     if (e.pointerType !== "mouse" || start) return;
+    const col = Math.floor((e.clientX - zone.left) / slot);   // the garment column under the cursor: load it first
+    if (col !== hoverCol) { hoverCol = col; items[col]?.turn?.hurry(); }
     setOpen(zoneAt(e.clientX, e.clientY));
   });
   list.addEventListener("pointerleave", (e) => { if (e.pointerType === "mouse") setOpen(-1); });
