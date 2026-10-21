@@ -119,12 +119,16 @@
         img.onload = () => {
           if (i === 0 || this.waiting) this.redraw();
           if (i === 0 || i === this.count - 1) this.bottom = Math.max(this.bottom, hemOf(img));
+          img.decode().catch(() => {});
         };
-        img.src = asset(g, `turn/${pad(i)}.webp`);
-        img.decode().catch(() => {});
         this.frames.push(img);
       }
       new ResizeObserver(() => this.redraw()).observe(host);
+    }
+    // request frame i if it has not been yet (load order: see loadFrames)
+    load(i) {
+      const img = this.frames[i];
+      if (!img.src) img.src = asset(this.g, `turn/${pad(i)}.webp`);
     }
     redraw() {
       this.waiting = false;
@@ -140,14 +144,21 @@
       // redraw on every tiny step: skipping sub-0.02-frame steps made the slow settle update irregularly
       if (!this.waiting && Math.abs(pos - this.pos) < 0.001) return;
       this.pos = pos;
-      const i = Math.floor(pos), f = pos - i;
-      const j = Math.min(i + 1, this.count - 1);
+      // the nearest frames that have arrived on either side: while the in-betweens are still downloading
+      // the turn blends across the gap (coarser, but it turns at once instead of freezing)
+      const ok = (k) => this.frames[k]?.naturalWidth;
+      let i = Math.floor(pos), j = Math.min(i + 1, this.count - 1);
+      while (i > 0 && !ok(i)) i--;
+      while (j < this.count - 1 && !ok(j)) j++;
+      if (!ok(j)) j = i;
+      const f = j > i ? clamp01((pos - i) / (j - i)) : 0;
       const a = this.frames[i], b = this.frames[j];
-      this.waiting = !a?.naturalWidth;
-      if (this.waiting) return;
+      const i0 = Math.floor(pos);
+      this.waiting = !ok(i0) || (pos > i0 + 0.01 && !ok(Math.min(i0 + 1, this.count - 1)));   // redraw when they arrive
+      if (!ok(i)) return;
       const { width: w, height: h } = this.canvas;
       this.ctx.clearRect(0, 0, w, h);
-      blend(this.ctx, a, f > 0.01 && b?.naturalWidth ? b : null, f, w, h);
+      blend(this.ctx, a, f > 0.01 && j !== i ? b : null, f, w, h);
       this.fctx.clearRect(0, 0, w, h);
       this.drawHook(i, j, f);
     }
@@ -220,6 +231,13 @@
       th: 0, thv: 0,          // swing angle (deg) + angular velocity
     };
   });
+
+  // Load order over a slow connection (443 frames, ~9 MB): every garment's resting and front frame
+  // first, then every 8th frame, every 4th, every 2nd, the rest - each garment can turn (coarsely, see
+  // set) within seconds instead of waiting for all of it, and gets smoother as the rest arrives.
+  const turns = items.map((it) => it.turn).filter(Boolean);
+  turns.forEach((t) => { t.load(0); t.load(t.count - 1); });
+  [8, 4, 2, 1].forEach((step) => turns.forEach((t) => { for (let i = 0; i < t.count; i += step) t.load(i); }));
 
   // ---------- one physics loop drives layout, turn and swing together ----------
   let active = -1;
@@ -352,7 +370,10 @@
     return items.findIndex((it) => Math.abs(left + it.x - x) <= (slot + clamp01(it.tp) * (open - slot)) / 2);
   }
 
-  list.addEventListener("pointermove", (e) => { if (e.pointerType === "mouse" && !start) setOpen(zoneAt(e.clientX, e.clientY)); });
+  list.addEventListener("pointermove", (e) => {
+    if (e.pointerType !== "mouse" || start) return;
+    setOpen(zoneAt(e.clientX, e.clientY));
+  });
   list.addEventListener("pointerleave", (e) => { if (e.pointerType === "mouse") setOpen(-1); });
   list.addEventListener("click", (e) => {
     if (e.pointerType === "mouse" && !start) { if (active >= 0) openDetail(active); return; }
