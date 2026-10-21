@@ -121,6 +121,9 @@
           if (i === 0 || i === this.count - 1) this.bottom = Math.max(this.bottom, hemOf(img));
           img.decode().catch(() => {});
         };
+        // a host hiccup (a 503 right after a deploy) must not leave a hole in the turn: retry a few times
+        let tries = 0;
+        img.onerror = () => { if (++tries <= 3) setTimeout(() => { img.src = asset(g, `turn/${pad(i)}.webp`) + `${window.ASSET_V ? "&" : "?"}r=${tries}`; }, 800 * tries); };
         this.frames.push(img);
       }
       new ResizeObserver(() => this.redraw()).observe(host);
